@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>DND Mini Character Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      padding: 2rem;
+      max-width: 700px;
+      margin: auto;
+    }
+    .section {
+      display: none;
+    }
+    .active {
+      display: block;
+    }
+    .btn {
+      margin-top: 1rem;
+      background-color: #5c3d99;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 0.5rem;
+      margin: 0.5rem 0;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+    .output-box {
+      background: white;
+      padding: 1rem;
+      border-radius: 6px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Mini D&D Character Generator</h1>
+
+  <div class="section active" id="section-intro">
+    <p><strong>Story Prompt:</strong><br>
+    Your character has been traveling from afar. It has heard about commotion in a village — they have a quest for adventurers. A magic golem has taken over their harvest field. It wants to protect the field from everyone, even its creator. They need your help.</p>
+    <p>You’re about to play a 15-minute Dungeons & Dragons session! In this game, you’ll take on the role of a fantasy character and explore a magical story using your imagination and a 20-sided die.</p>
+    <button class="btn" onclick="nextSection('section-mbti')">Let's begin!</button>
+  </div>
+
+  <div class="section" id="section-mbti">
+    <h2>1. What is your MBTI type?</h2>
+    <input type="text" id="mbti" placeholder="e.g. INFP, ESTJ, etc." />
+    <button class="btn" onclick="nextSection('section-quiz')">Next</button>
+  </div>
+
+  <div class="section" id="section-quiz">
+    <h2>2. You’re walking alone in a magical forest. What do you do?</h2>
+    <label><input type="radio" name="class" value="Barbarian"> Fight anything that appears</label><br>
+    <label><input type="radio" name="class" value="Rogue"> Sneak quietly past danger</label><br>
+    <label><input type="radio" name="class" value="Bard"> Look for allies and inspire them</label><br>
+    <label><input type="radio" name="class" value="Wizard"> Use a spell to stay safe</label><br>
+    <label><input type="radio" name="class" value="Priest"> Pray for protection and guidance</label><br>
+    <button class="btn" onclick="nextSection('section-name')">Next</button>
+  </div>
+
+  <div class="section" id="section-name">
+    <h2>3. What is your character's name?</h2>
+    <input type="text" id="charName" placeholder="e.g. Elrion the Bold" />
+    <button class="btn" onclick="nextSection('section-background')">Next</button>
+  </div>
+
+  <div class="section" id="section-background">
+    <h2>4. Your character's past</h2>
+    <input type="text" id="background" placeholder="What did your character used to do?" /><br>
+    <input type="text" id="golem" placeholder="How did they learn about the magic golems?" />
+    <button class="btn" onclick="generateCharacter()">Finish</button>
+  </div>
+
+  <div class="section" id="section-summary">
+    <h2>Your Character Summary</h2>
+    <div class="output-box">
+      <p><strong>Name:</strong> <span id="summary-name"></span></p>
+      <p><strong>Class:</strong> <span id="summary-class"></span> — <span id="summary-desc"></span></p>
+      <p><strong>Background:</strong> <span id="summary-bg"></span></p>
+      <p><strong>Knows about golems because:</strong> <span id="summary-golem"></span></p>
+      <p><strong>Stats (Roll a D20 + stat modifier):</strong></p>
+      <ul id="summary-stats"></ul>
+      <p><strong>Item / Spell:</strong> <span id="summary-item"></span></p>
+    </div>
+  </div>
+
+  <script>
+    function nextSection(id) {
+      document.querySelectorAll('.section').forEach(section => {
+        section.classList.remove('active');
+      });
+      document.getElementById(id).classList.add('active');
+    }
+
+    function generateCharacter() {
+      const name = document.getElementById("charName").value || "Nameless Hero";
+      const bg = document.getElementById("background").value || "No known history.";
+      const golem = document.getElementById("golem").value || "Unknown.";
+      const chosenClass = document.querySelector('input[name="class"]:checked')?.value || "Wanderer";
+
+      const classDescriptions = {
+        Barbarian: "A powerful warrior who smashes through enemies.",
+        Rogue: "A sneaky and clever scout.",
+        Bard: "A performer who lifts spirits and leads the way.",
+        Wizard: "A wise spellcaster who bends magic to their will.",
+        Priest: "A healer guided by divine power.",
+        Wanderer: "An unknown traveler with untapped potential."
+      };
+
+      const classItems = {
+        Barbarian: "Greataxe – To attack with this, ask your DM. If you do damage, roll a 12-sided die (d12).",
+        Rogue: "Dagger – To attack with this, ask your DM. If you do damage, roll a 4-sided die (d4).",
+        Bard: "Lute – Ask your DM to inspire or charm. Roll a 6-sided die (d6) for effect.",
+        Wizard: "Firebolt – Ask your DM to cast. Roll a 10-sided die (d10) for damage.",
+        Priest: "Sacred Flame – Ask your DM to call divine light. Roll a 8-sided die (d8) for damage.",
+        Wanderer: "A mysterious object. Ask your DM what it might do."
+      };
+
+      const statTemplates = {
+        Barbarian: {
+          Strength: 4, Dexterity: 2, Constitution: 3, Intelligence: 0, Wisdom: 1, Charisma: -1
+        },
+        Rogue: {
+          Strength: 0, Dexterity: 4, Constitution: 2, Intelligence: 3, Wisdom: 1, Charisma: -1
+        },
+        Bard: {
+          Strength: 0, Dexterity: 1, Constitution: 2, Intelligence: 3, Wisdom: -1, Charisma: 4
+        },
+        Wizard: {
+          Strength: -1, Dexterity: 2, Constitution: 1, Intelligence: 4, Wisdom: 3, Charisma: 0
+        },
+        Priest: {
+          Strength: 0, Dexterity: -1, Constitution: 2, Intelligence: 1, Wisdom: 4, Charisma: 3
+        },
+        Wanderer: {
+          Strength: 1, Dexterity: 1, Constitution: 1, Intelligence: 1, Wisdom: 1, Charisma: 1
+        }
+      };
+
+      const statDescriptions = {
+        Strength: "Physical power (e.g. breaking things)",
+        Dexterity: "Speed and reflexes (e.g. dodging, sneaking)",
+        Constitution: "Endurance (e.g. staying conscious)",
+        Intelligence: "Knowledge and logic (e.g. solving puzzles)",
+        Wisdom: "Perception and insight (e.g. noticing hidden things)",
+        Charisma: "Charm and presence (e.g. persuasion, inspiration)"
+      };
+
+      document.getElementById("summary-name").textContent = name;
+      document.getElementById("summary-class").textContent = chosenClass;
+      document.getElementById("summary-desc").textContent = classDescriptions[chosenClass];
+      document.getElementById("summary-bg").textContent = bg;
+      document.getElementById("summary-golem").textContent = golem;
+      document.getElementById("summary-item").textContent = classItems[chosenClass];
+
+      const stats = statTemplates[chosenClass];
+      const statList = document.getElementById("summary-stats");
+      statList.innerHTML = "";
+
+      for (let stat in stats) {
+        const li = document.createElement("li");
+        li.innerHTML = `<strong>${stat} (+${stats[stat]}):</strong> ${statDescriptions[stat]}`;
+        statList.appendChild(li);
+      }
+
+      nextSection("section-summary");
+    }
+  </script>
+
+</body>
+</html>
